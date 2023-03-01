@@ -17,6 +17,7 @@ namespace Sales.API.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Country>().HasIndex(x => x.Name).IsUnique(); // create index and unique for Country table
+            modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique(); //create index and unique for Category table
         }
     }
 }
