@@ -11,6 +11,7 @@ namespace Sales.API.Data
         }
 
         public DbSet<Country> Countries { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         //Validate duplicates to Country table
         protected override void OnModelCreating(ModelBuilder modelBuilder)
