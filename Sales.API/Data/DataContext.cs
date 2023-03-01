@@ -11,12 +11,14 @@ namespace Sales.API.Data
         }
 
         public DbSet<Country> Countries { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         //Validate duplicates to Country table
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Country>().HasIndex(x => x.Name).IsUnique(); // create index and unique for Country table
+            modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique(); //create index and unique for Category table
         }
     }
 }
