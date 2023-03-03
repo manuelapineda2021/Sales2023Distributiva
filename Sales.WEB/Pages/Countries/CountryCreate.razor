@@ -21,12 +21,12 @@
             return;
         }
 
-        countryForm!.FormPostedSuccessfully = true;
-        navegationManager.NavigateTo("/countries");
+        Return();
     }
 
     private void Return()
     {
+        countryForm!.FormPostedSuccessfully = true;
         navegationManager.NavigateTo("/countries");
     }
 }
