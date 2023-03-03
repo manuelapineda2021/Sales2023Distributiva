@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sales.API.Data;
 using Sales.shared.Entities;
-using System.Runtime.CompilerServices;
 
 namespace Sales.API.Controllers
 {
@@ -12,7 +11,7 @@ namespace Sales.API.Controllers
     {
         private readonly DataContext _context;
 
-        public CategoriesController( DataContext context)
+        public CategoriesController(DataContext context)
         {
             _context = context;
         }
@@ -23,12 +22,78 @@ namespace Sales.API.Controllers
             return Ok(await _context.Categories.ToListAsync());
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetAsync(int id)
+        {
+            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(category);
+        }
+
         [HttpPost]
         public async Task<ActionResult> PostAsync(Category category)
         {
-            _context.Add(category);
+            try
+            {
+                _context.Add(category);
+                await _context.SaveChangesAsync();
+                return Ok(category);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicate"))
+                {
+                    return BadRequest("Ya existe una categoría con el mismo nombre");
+                }
+
+                return BadRequest(dbUpdateException.Message);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> PutAsync(Category category)
+        {
+            try
+            {
+                _context.Update(category);
+                await _context.SaveChangesAsync();
+                return Ok(category);
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException!.Message.Contains("duplicate"))
+                {
+                    return BadRequest("Ya existe una categoría con el mismo nombre");
+                }
+
+                return BadRequest(dbUpdateException.Message);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            _context.Remove(category);
             await _context.SaveChangesAsync();
-            return Ok(category);
+            return NoContent();
         }
     }
 }
