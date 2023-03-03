@@ -3,13 +3,13 @@
 
 <h3>Categorías</h3>
 
-@if (Categories is null)
-{
-    <p>Cargando...</p>
-}
-else
-{
-    <table class="table table-striped">
+<GenericList MyList="Categories">
+    <Loading>
+        <p>Cargando...</p>
+    </Loading>
+
+    <Body>
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th></th>
@@ -17,7 +17,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var category in Categories)
+                @foreach (var category in Categories!)
                 {
                     <tr>
                         <td>
@@ -27,12 +27,12 @@ else
                         <td>
                             @category.Name
                         </td>
-                    </tr>   
+                    </tr>
                 }
             </tbody>
         </table>
-
-}
+    </Body>
+</GenericList>
 
 @code {
     public List<Category>? Categories { get; set; }
