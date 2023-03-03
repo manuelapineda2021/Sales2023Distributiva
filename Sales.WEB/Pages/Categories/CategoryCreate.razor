@@ -5,11 +5,11 @@
 
 <h3>Crear Categoría</h3>
 
-<CategoryFrom @ref="categoryForm" Category="category" OnValidSubmit="Create" ReturnAction="Return" />
+<CategoryForm @ref="categoryForm" Category="category" OnValidSubmit="Create" ReturnAction="Return" />
 
 @code {
     private Category category = new();
-    private CategoryFrom? categoryForm;
+    private CategoryForm? categoryForm;
 
     private async Task Create()
     {
@@ -17,7 +17,7 @@
         if (httpResponse.Error)
         {
             var message = await httpResponse.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message);
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
         }
 

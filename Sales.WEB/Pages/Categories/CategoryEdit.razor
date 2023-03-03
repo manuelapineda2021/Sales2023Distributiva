@@ -11,12 +11,12 @@
 }
 else
 {
-    <CategoryFrom @ref="categoryForm" Category="category" OnValidSubmit="EditAsync" ReturnAction="Return" />
+    <CategoryForm @ref="categoryForm" Category="category" OnValidSubmit="EditAsync" ReturnAction="Return" />
 }
 
 @code {
     private Category? category;
-    private CategoryFrom? categoryForm;
+    private CategoryForm? categoryForm;
 
     [Parameter]
     public int Id { get; set; }
