@@ -1,4 +1,14 @@
-﻿<h3>Pagination</h3>
+﻿<nav>
+    <ul class="pagination">
+
+        @foreach (var link in Links)
+        {
+            <li @onclick=@(() => InternalSelectedPage(link)) style="cursor: pointer" class="page-item @(link.Enable ? null : "disabled") @(link.Enable ? "active" : null)">
+                <a class="page-link">@link.Text</a>
+            </li>
+        }
+    </ul>
+</nav>
 
 @code {
     [Parameter] public int CurrentPage { get; set; } = 1; //current page
@@ -44,6 +54,17 @@
             });
 
     }
+
+    private async Task InternalSelectedPage(PageModel pageModel)
+    {
+        if (pageModel.Page == CurrentPage || pageModel.Page == 0)
+        {
+            return;
+        }
+
+        await SelectedPage.InvokeAsync(pageModel.Page);
+    }
+
 
 
     class PageModel
