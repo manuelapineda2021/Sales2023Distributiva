@@ -8,20 +8,23 @@ using Sales.shared.Entities;
 namespace Sales.API.Controllers
 {
     [ApiController]
-    [Route("/api/categories")]
-    public class CategoriesController : ControllerBase
+    [Route("/api/states")]
+    public class StatesController :ControllerBase
     {
         private readonly DataContext _context;
 
-        public CategoriesController(DataContext context)
+        public StatesController(DataContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync([FromQuery] PaginationDTO pagination)
+        public async Task<ActionResult> Get([FromQuery] PaginationDTO pagination)
         {
-            var queryable = _context.Categories.AsQueryable();
+            var queryable = _context.States
+                .Include(x => x.Cities)
+                .Where(x => x.Country!.Id == pagination.Id)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
@@ -34,51 +37,55 @@ namespace Sales.API.Controllers
                 .ToListAsync());
         }
 
-        //number of pages
         [HttpGet("totalPages")]
         public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
         {
-            var queryable = _context.Countries.AsQueryable();
+            var queryable = _context.States
+                .Where(x => x.Country!.Id == pagination.Id)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(pagination.Filter))
             {
                 queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
             }
 
-            double count = await queryable.CountAsync();//count number of records
-            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);//total of pages
+            double count = await queryable.CountAsync();
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);
             return Ok(totalPages);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetAsync(int id)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-            if (category == null)
+            var state = await _context.States
+                .Include(x=>x.Cities)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (state == null)
             {
                 return NotFound();
             }
 
-            return Ok(category);
+            return Ok(state);
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostAsync(Category category)
+        public async Task<ActionResult> PostAsync(State state)
         {
             try
             {
-                _context.Add(category);
+                _context.Add(state);
                 await _context.SaveChangesAsync();
-                return Ok(category);
+                return Ok(state);
             }
             catch (DbUpdateException dbUpdateException)
             {
                 if (dbUpdateException.InnerException!.Message.Contains("duplicate"))
                 {
-                    return BadRequest("Ya existe una categoría con el mismo nombre");
+                    return BadRequest("Ya existe un estado/departamento con el mismo nombre.");
                 }
 
                 return BadRequest(dbUpdateException.Message);
+
             }
             catch (Exception exception)
             {
@@ -87,22 +94,23 @@ namespace Sales.API.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> PutAsync(Category category)
+        public async Task<ActionResult> PutAsync(State state)
         {
             try
             {
-                _context.Update(category);
+                _context.Update(state);
                 await _context.SaveChangesAsync();
-                return Ok(category);
+                return Ok(state);
             }
             catch (DbUpdateException dbUpdateException)
             {
                 if (dbUpdateException.InnerException!.Message.Contains("duplicate"))
                 {
-                    return BadRequest("Ya existe una categoría con el mismo nombre");
+                    return BadRequest("Ya existe un estado/departamento con el mismo nombre.");
                 }
 
                 return BadRequest(dbUpdateException.Message);
+
             }
             catch (Exception exception)
             {
@@ -113,13 +121,13 @@ namespace Sales.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-            if (category == null)
+            var state = await _context.States.FirstOrDefaultAsync(x => x.Id == id);
+            if (state == null)
             {
                 return NotFound();
             }
 
-            _context.Remove(category);
+            _context.Remove(state);
             await _context.SaveChangesAsync();
             return NoContent();
         }

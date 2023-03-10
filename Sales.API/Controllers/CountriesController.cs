@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sales.API.Data;
+using Sales.API.Helpers;
+using Sales.shared.DTOs;
 using Sales.shared.Entities;
 
 namespace Sales.API.Controllers
@@ -19,16 +21,56 @@ namespace Sales.API.Controllers
 
         //Consult records
         [HttpGet]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery] PaginationDTO pagination )
         {
-            return Ok(await _context.Countries.ToListAsync());
+            var queryable = _context.Countries
+                .Include(x => x.States).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            return Ok(await queryable
+                .OrderBy(x => x.Name)
+                .Paginate(pagination)
+                .ToListAsync());
+        }
+
+        //number of pages
+        [HttpGet("totalPages")]
+        public async Task<ActionResult> GetPages([FromQuery] PaginationDTO pagination)
+        {
+            var queryable = _context.Countries.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(pagination.Filter))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(pagination.Filter.ToLower()));
+            }
+
+            double count = await queryable.CountAsync(); //count number of records
+            double totalPages = Math.Ceiling(count / pagination.RecordsNumber);// total of pages
+            return Ok(totalPages);
+        }
+
+        //overload GET
+        [HttpGet ("full")]
+        public async Task<IActionResult> GetFullAsync()
+        {
+            return Ok(await _context.Countries
+                .Include(x => x.States!)
+                .ThenInclude(x => x.Cities)
+                .ToListAsync());
         }
 
         //Query a record with Id
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetAsync(int id)
         {
-            var country = await _context.Countries.FirstOrDefaultAsync(x => x.Id == id);
+            var country = await _context.Countries
+                .Include(x => x.States!)
+                .ThenInclude(x=> x.Cities)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (country == null)
             {
                 return NotFound();

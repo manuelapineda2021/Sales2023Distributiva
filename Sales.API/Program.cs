@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Sales.API.Data;
+using Sales.API.Services;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=localbd"));
 builder.Services.AddTransient<SeedDB>(); //inject only one
+builder.Services.AddScoped<IApiService, ApiService>();
 
 var app = builder.Build();
 SeedData(app);

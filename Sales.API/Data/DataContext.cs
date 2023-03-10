@@ -10,7 +10,12 @@ namespace Sales.API.Data
 
         }
 
+        public DbSet<City> Cities { get; set; }
+
         public DbSet<Country> Countries { get; set; }
+
+        public DbSet<State> States { get; set; }
+
         public DbSet<Category> Categories { get; set; }
 
         //Validate duplicates to Country table
@@ -19,6 +24,8 @@ namespace Sales.API.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Country>().HasIndex(x => x.Name).IsUnique(); // create index and unique for Country table
             modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique(); //create index and unique for Category table
+            modelBuilder.Entity<State>().HasIndex("CountryId", "Name").IsUnique();
+            modelBuilder.Entity<City>().HasIndex("StateId", "Name").IsUnique();
         }
     }
 }
