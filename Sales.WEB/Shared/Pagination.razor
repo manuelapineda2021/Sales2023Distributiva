@@ -1,0 +1,56 @@
+﻿<h3>Pagination</h3>
+
+@code {
+    [Parameter] public int CurrentPage { get; set; } = 1; //current page
+    [Parameter] public int TotalPages { get; set; } 
+    [Parameter] public int Radio { get; set; } = 5;
+    [Parameter] public EventCallback<int> SelectedPage { get; set; }//event, when the user clicks on a page
+    List<PageModel> Links = new();
+
+    //method that executes when the parameters are in memory
+    protected override void OnParametersSet()
+    {
+        Links = new List<PageModel>();
+
+        var previousLinkEnable = CurrentPage != 1;
+        var previousLinkPage = CurrentPage - 1;
+        Links.Add(new PageModel
+            {
+                Text = "Anterior",
+                Page = previousLinkPage,
+                Enable = previousLinkEnable
+            });
+
+        for (int i = 1; i <= TotalPages; i++)
+        {
+            if (i >= CurrentPage - Radio && i <= CurrentPage + Radio)
+            {
+                Links.Add(new PageModel
+                    {
+                        Page = i,
+                        Enable = CurrentPage == i,
+                        Text = $"{i}"
+                    });
+            }
+        }
+
+        var linkNextEnable = CurrentPage != TotalPages;
+        var linkNextPage = CurrentPage + 1;
+        Links.Add(new PageModel
+            {
+                Text = "Siguiente",
+                Page = linkNextPage,
+                Enable = linkNextEnable
+            });
+
+    }
+
+
+    class PageModel
+    {
+        public string Text { get; set; } = null!;
+        public int Page { get; set; }
+        public bool Enable { get; set; } = true; //enable page
+        public bool Active { get; set; } = false; //active page
+    }
+}
